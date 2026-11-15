@@ -1,66 +1,64 @@
-# myGame – ASCII Racing Game
+# Calendar App (C# / Windows Forms)
 
-A single-player racing game for the Windows console, written in C++. The track, the car and every menu are drawn with text characters, and the game has its own soundtrack and engine sound.
+A desktop calendar for Windows, written in C# with Windows Forms (.NET Framework 4.8). It started as a university project for an object-oriented programming course. You can add events and look at them by day, week, month or year.
 
 ## Features
 
-- Menu with play, settings and exit options
-- Choice of car colour (yellow, blue, red, purple, orange, light navy) and a nickname, with a preview of your car before the race
-- Race start with a 3-2-1-GO countdown sound and ASCII countdown numbers
-- A long ASCII track with straights, curves and a finish line
-- Steering and speed control in real time (keyboard polling)
-- Background music with three soundtracks to choose from in Settings, plus an engine sound during the race
-- Every finished race is saved to `records.txt` with the date, nickname and finishing time
+- **Four views:** day (24-hour timeline), week (Monday to Sunday), month grid and year overview. Days that have events are highlighted in the year view.
+- **Mini calendar:** pick a date on the left and the open view jumps to that date.
+- **Events:** each event has a name, start and end time, and a note. Add and edit them in a dialog window. If a day has several events, you choose which one to edit.
+- **Event details:** click an event to open its details, and from there mark it as done (it turns grey with a tick) or delete it.
+- **Validation:** an event needs a name and cannot end before it starts.
 
-## Controls
+## Project structure
 
-| Key | Action |
-| --- | --- |
-| A / D | Steer left / right |
-| W / S | Speed up / slow down |
-| Esc | Quit the race |
-| 1, 2, 3, y, n ... | Choose options in menus |
+| File | What it does |
+|------|--------------|
+| `Event.cs` | The `Event` class: id, name, start, end, note, done flag |
+| `Manager.cs` | Keeps the list of events, keeps it sorted, and answers queries by day, month or year using LINQ |
+| `Form1.cs` | Main window: view buttons, mini calendar, switching views. It owns the single `Manager` that all views share |
+| `AddEvent.cs` | Dialog for adding and editing an event, with input validation |
+| `details.cs` | Dialog showing one event, with "mark as done" and "delete" |
+| `ViewDay.cs`, `ViewWeek.cs`, `ViewMonth.cs`, `ViewYear.cs` | One `UserControl` per view, each with a `Populate` method that draws the events |
 
-## How it works
+## What I practised
 
-- The track is stored as a `vector<string>`. Each frame the game prints a window of this vector, moving it down one line at a time, which gives the feeling of driving forward.
-- The car is drawn at a fixed height and moved sideways using console cursor positioning (`SetConsoleCursorPosition`). Its colour is set with `SetConsoleTextAttribute`.
-- Keys are read with `GetAsyncKeyState`, so steering and speed react while a key is held down.
-- Audio uses SFML (`sf::Music` and `sf::SoundBuffer`).
-- Results are appended to a text file with `fstream`, one entry per race.
+- Object-oriented design: separate classes for data (`Event`) and logic (`Manager`)
+- Reusable `UserControl` views swapped into one main panel
+- Sharing one object between several forms and controls, so they all work on the same data
+- LINQ for filtering and sorting events
+- Building layouts in code with `TableLayoutPanel` and `FlowLayoutPanel`
 
-## Requirements
+## How to run
 
-- Windows (the code uses `Windows.h`, `conio.h` and the Windows console API)
-- Visual Studio with the C++ desktop workload (project uses C++20)
-- SFML, audio module only (`sfml-system`, `sfml-audio`); the headers and libraries are in `include/` and `lib/` in this repository
-- Five sound files in `.ogg` format (see below)
+1. Install Visual Studio with the ".NET desktop development" workload.
+2. Open `calendarapp.slnx`.
+3. Press **F5**.
 
-## Build and run
+## Screenshots
 
-1. Open `myGame.slnx` in Visual Studio.
-2. Make sure SFML's `include` and `lib` folders are set up for the project.
-3. Create an `assets` folder next to `myGame.cpp` (`myGame/assets/`) and add the sound files listed below. The code loads them with relative paths such as `assets\f1_engine_sound.ogg`.
-4. Build and run (F5). Race results are saved to `records.txt` in the working directory.
+**Month view** – days with events show the event names:
 
-### Sound files
+![Month view](screenshots/month.png)
 
-The soundtracks are not included in this repository because they are copyrighted. The game expects these file names in the `assets` folder; you can use any `.ogg` audio you like under the same names:
+**Year view** – days that have events are highlighted:
 
-- `F1soundtrackext.ogg`, `F1Mexican.ogg`, `F1Theme.ogg` (the three menu soundtracks)
-- `race-start.ogg` (countdown sound)
-- `f1_engine_sound.ogg` (engine sound during the race)
+![Year view](screenshots/year.png)
 
-If a file is missing the game still runs and prints an error message instead of playing that sound.
+**Add / edit event dialog:**
+
+![Add event dialog](screenshots/add-event.png)
 
 ## Known limitations
 
-- The game is one procedural source file; all functions and the track data live in `myGame.cpp`.
-- There is a single track and no opponents. A race is a timed lap.
-- Windows only, because of the console API.
+This is a student project and still a work in progress.
 
-## Ideas for next steps
+- Events are kept in memory only, so they are lost when the app is closed. There is no database or file saving yet.
+- Events are shown in the hour they start. Two events that start in the same hour overlap in the day and week views.
+- Events that last past midnight are shown only until the end of their first day.
 
-- Split the code into separate files and classes (`Car`, `Track`, `Menu`, `RecordsManager`)
-- Add obstacles or opponent cars, a leaderboard screen and more tracks
-- Read the best times back from `records.txt` and show them in the menu
+## Possible next steps
+
+- Save events to a file or a SQLite database
+- Show overlapping events side by side
+- Unit tests for `Manager`
